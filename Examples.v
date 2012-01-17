@@ -12,13 +12,29 @@
 Require Import BitcoinScript.
 Require Import List Program Ascii.
 
-(* Simple computation examples. Scripts can be evaluated to 
-   produce results, i.e. a simulator/interpreter. *)
+
+(* Simple computation examples. *)
+(* Scripts can be evaluated to produce results, i.e. a
+   simulator/interpreter. 
+
+   EvalScriptInit is just like EvalScript, except it begins with the 
+   initial validate state, Some ([], [])  (both stacks are empty)
+     EvalScript : (list BitcoinOp) -> BtcState -> BtcState.
+     EvalScriptInit : (list BitcoinOp) -> BtcState
+*)
+
+Check EvalScript.
+Check EvalScriptInit.
+
+(* TODO: Actually these don't fully simplify because I haven't 
+   instantiated bytes_of_bool, nat_of_bytes, and the like (data 
+   type conversions) *)
 Eval compute in EvalScriptInit [OP_1; OP_IFDUP; OP_DUP; OP_IFDUP].
 Eval compute in EvalScriptInit [OP_0; OP_IFDUP].
 Eval compute in EvalScriptInit [OP_0; OP_IF [OP_DUP] []].
 
-(* Universal quantification over scripts and states *)
+
+(* Some theorems involving quantification over scripts and states *)
 
 (* The error state is preserved regardless of the operation *)
 Lemma none_stays : forall fragment, EvalScript fragment None = None.
@@ -35,8 +51,15 @@ intros. unfold EvalScriptInit. simpl. apply none_stays. Qed.
    quantifying over all possible input states *)
 Example eq_ifdup : forall s, EvalScript [OP_IFDUP] s = 
                              EvalScript [OP_DUP; OP_IF [OP_DUP] []] s.
-intros.
 unfold EvalScript. 
-destruct s.
+destruct s; auto.
 destruct p as (main, alt). destruct main; auto.
-auto. Qed.
+Qed.
+
+(* Here's a proof that [OP_PUSHDATA; OP_DROP] is a nop *)
+Example drop_nop : forall s x, EvalScript [OP_PUSHDATA x; OP_DROP] s =
+                               EvalScript [] s.
+unfold EvalScript.
+destruct s; auto.
+destruct p as (main, alt); destruct main; auto.
+Qed.
