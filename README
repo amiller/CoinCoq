@@ -1,0 +1,12 @@
+Work in progress.
+
+- BitcoinScript.v
+An attempt at a formalized (pure functional) specifcation of Bitcoin 
+transaction validation, etc. A 'correct-by-construction' Tx validator (ocaml 
+or Haskell code) can be extracted from the specification. 
+
+- Examples.v
+The main point of this formalization is to help prove 'theorems' about the 
+bitcoin script language. A few examples are provided. In particular, it's 
+possible to quantify over families of scripts, showing them to be
+unsatisfiable, or to show two families of scripts equivalent to each other.
